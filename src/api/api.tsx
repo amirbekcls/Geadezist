@@ -1,0 +1,1 @@
+export const URL_ALL = "http://142.93.106.195:9090"
