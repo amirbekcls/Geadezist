@@ -52,7 +52,6 @@ const DistrictPage: React.FC = () => {
         }
     };
 
-
     const addDistrict = async () => {
         if (!districtName || selectedRegionId === null) {
             toast.warn("Please enter a district name and select a region.");
@@ -81,10 +80,36 @@ const DistrictPage: React.FC = () => {
         }
     };
 
-    // Inside DistrictPage
+    const editDistrict = async () => {
+        if (!districtName || selectedRegionId === null || !editedDistrict) {
+            toast.warn("Please enter a district name and select a region.");
+            return;
+        }
+
+        try {
+            const response = await axios.put(
+                `http://142.93.106.195:9090/district/${editedDistrict.id}`,
+                { name: districtName, regionId: selectedRegionId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data.success) {
+                toast.success("District edited successfully.");
+                fetchDataAndSetState();
+                setDistrictName("");
+                setSelectedRegionId(null);
+                setIsDistrictEditModalVisible(false); // Close modal after successful editing
+            } else {
+                toast.error("Failed to edit district.");
+            }
+        } catch (err) {
+            toast.error("Error editing district.");
+            console.error(err);
+        }
+    };
+
     const handleDeleteDistrict = async () => {
         if (editedDistrict && token) {
-            // Pass the arguments in the correct order: id first, resourceType second
             const success = await deleteResource(editedDistrict.id, "district", token);
             if (success) {
                 fetchDataAndSetState(); // Refresh the data after successful deletion
@@ -123,16 +148,14 @@ const DistrictPage: React.FC = () => {
                         }}
                         type="default"
                         style={{
-                             // bg-gray-600
-                            color: "black",
-                            border: "none",
-                            cursor: "pointer",
-                            boxShadow:"none"
+                             color: "black",
+                             border: "none",
+                             cursor: "pointer",
+                             boxShadow:"none",
+                             background:"none"
                         }}
-                        // onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#374151")} // bg-gray-700
-                        // onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4B5563")} // bg-gray-60
-                    >
-                        <MdEdit />
+                    >   
+                        <MdEdit className="hover:text-yellow-600" />
                     </Button>
                     <Button
                         onClick={() => {
@@ -140,15 +163,16 @@ const DistrictPage: React.FC = () => {
                             setIsDistrictDeleteModalVisible(true); // Open delete modal
                         }}
                         style={{
-                            // bg-gray-600
                            color: "black",
                            border: "none",
                            cursor: "pointer",
-                           boxShadow:"none"
+                           boxShadow:"none",
+                           background:"none"
+                           
+
                        }}
                     >
-                        {/* Delete */}
-                        <MdDelete />
+                        <MdDelete className="hover:text-red-600" />
                     </Button>
                 </Space>
             ),
@@ -165,19 +189,19 @@ const DistrictPage: React.FC = () => {
             <Button
                 onClick={() => setIsDistrictAddModalVisible(true)} // Open add district modal
                 style={{
-                    backgroundColor: "#4B5563", // bg-gray-600
+                    backgroundColor: "#4B5563",
                     color: "white",
                     border: "none",
                     cursor: "pointer",
                     marginBottom:"10px"
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#374151")} // bg-gray-700
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4B5563")} // bg-gray-600
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#374151")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4B5563")}
             >
-                <span className="text-2xl text-white">
-                    <MdOutlineAddCircle />
-                </span>{" "}
-                Қўшиш
+                 <span style={{ verticalAlign: "middle", display:'flex', justifyContent:'center', alignItems:'center', gap:"5px" }}>  
+                 <MdOutlineAddCircle style={{ width:"20px", height:"20px" }} />
+                   
+                    Қўшиш</span>
             </Button>
 
             <Table
@@ -220,7 +244,7 @@ const DistrictPage: React.FC = () => {
             <Modal
                 title="Edit District"
                 open={isDistrictEditModalVisible}
-                onOk={addDistrict} // You can create a separate edit function
+                onOk={editDistrict} // Use editDistrict here
                 onCancel={() => setIsDistrictEditModalVisible(false)}
                 okText="Save"
                 cancelText="Cancel"

@@ -139,13 +139,14 @@ const Region: React.FC = () => {
             }}
             style={{
               // bg-gray-600
-             color: "black",
-             border: "none",
-             cursor: "pointer",
-             boxShadow:"none"
-         }}
+              color: "black",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "none",
+              background: "none"
+            }}
           >
-            <MdEdit />
+            <MdEdit className="hover:text-yellow-600" />
           </Button>
           <Button
             onClick={() => {
@@ -154,13 +155,14 @@ const Region: React.FC = () => {
             }}
             style={{
               // bg-gray-600
-             color: "black",
-             border: "none",
-             cursor: "pointer",
-             boxShadow:"none"
-         }}
+              color: "black",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "none",
+              background: "none"
+            }}
           >
-            <MdDelete />
+            <MdDelete className="hover:text-red-600" />
           </Button>
         </Space>
       ),
@@ -176,20 +178,31 @@ const Region: React.FC = () => {
     <div>
       <h1 className="font-bold pb-3">Вилоятлар</h1>
       <Button
-        type="primary"
-        onClick={() => setIsRegionAddModalVisible(true)} // Open add region modal
-        style={{
-          backgroundColor: "#4B5563", // bg-gray-600
-          color: "white",
-          border: "none",
-          cursor: "pointer",
-          marginBottom:"10px"
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#374151")} // bg-gray-700
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4B5563")} // bg-gray-600
-  >      
-        <span className="text-2xl"><MdOutlineAddCircle/></span>{""} Қўшиш
-      </Button>
+  type="default"
+  onClick={() => setIsRegionAddModalVisible(true)} // Open add region modal
+  style={{
+    backgroundColor: "#4B5563", // bg-gray-600
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    marginBottom: "10px",
+    display: "inline-flex", // Inline flex
+    alignItems: "center", // Vertikal markazlash
+    justifyContent: "center", // Gorizontal markazlash
+    padding: "8px 16px", // Kichik bo'shliq
+  }}
+  className="pb-8"
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#374151")} // bg-gray-700
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#4B5563")} // bg-gray-600
+>
+  <span style={{ verticalAlign: "middle", display:'flex', justifyContent:'center', alignItems:'center', gap:"5px" }}>  
+  <MdOutlineAddCircle style={{ width:"20px", height:"20px" }} />
+    
+     Қўшиш</span>
+</Button>
+
+
+
 
       <Table
         dataSource={regions}
