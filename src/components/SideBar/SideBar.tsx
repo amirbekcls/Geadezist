@@ -20,8 +20,8 @@ const Sidebar = () => {
     },
     {
       name: "Тест",
-      path: "/test",
-      roles: ["ROLE_SUPER_ADMIN", "ROLE_TESTER", "ROLE_CLIENT"],
+      path: "/test ",
+      roles: ["ROLE_SUPER_ADMIN", "ROLE_TESTER"],
     },
     {
       name: "Фойдаланувчилар",
@@ -44,10 +44,15 @@ const Sidebar = () => {
       roles: ["ROLE_SUPER_ADMIN"],
     },
     {
+      name: "Тест",
+      path: "/client/test",
+      roles: ["ROLE_CLIENT"],
+    },
+    {
       name: "Натижалар булими",
       path: "/result",
       roles: ["ROLE_CLIENT"],
-    },
+    }
   ];
 
   // Toggle sidebar visibility

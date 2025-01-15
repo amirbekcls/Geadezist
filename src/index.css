@@ -88,5 +88,3 @@
   .toggle-input:checked + .toggle .toggle-icon.off {
     fill: var(--active-color);
   }
-  
-  

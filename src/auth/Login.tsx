@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuthStore } from "../store/authStore"; // import the auth store
 import axios from "axios";
+import loginImg from '../../public/login.png'
 
 function Login() {
   const navigate = useNavigate();
@@ -90,6 +91,9 @@ function Login() {
         margin: 0,
       }}
     >
+    <div className="">
+      <img src={loginImg} alt="Login Rasmi" />
+    </div>
       <div
         style={{
           width: "100%",
@@ -163,12 +167,12 @@ function Login() {
             width: "100%",
             padding: "12px",
             fontSize: "16px",
-            backgroundColor: "#5213e7",
             color: "#fff",
             border: "none",
             borderRadius: "4px",
             cursor: isLoginButtonDisabled ? "not-allowed" : "pointer",
           }}
+          className="bg-blue-600 hover:bg-blue-700 font-bold"
         >
           {isLoading ? "Kirish..." : "Тизимга кириш"}
         </button>

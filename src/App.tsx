@@ -13,6 +13,10 @@ import Employees from './pages/Employees';
 import Adress from './pages/address/adress';
 import AdminLaylaut from './Laylaut/adminLaylaut';
 import AddTest from './components/Test/AddTest';
+import TestWork from './components/Tests/TestWork';
+import Test from './pages/test';
+import ClientResult from './components/ClientResult/clientresult';
+import ClientTest from './components/ClientTest/clienttest';
 
 // import NotFound from './pages/NotFound';
 // import Distric from './pages/Addresses/distric';
@@ -22,7 +26,6 @@ const App: React.FC = () => {
   const location = useLocation();
   const role = sessionStorage.getItem('role');
   const token = sessionStorage.getItem('token');
-
   // Redirect unauthenticated users to login
   useEffect(() => {
     if (!token && location.pathname !== '/login') {
@@ -68,11 +71,14 @@ const App: React.FC = () => {
           <Route path='dashboard' element={<Dashboard />} />
           <Route path='users' element={protectedRoute('ROLE_SUPER_ADMIN', <Users />)} />
           <Route path='categories' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <Categories />)} />
-          <Route path='test' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN', 'ROLE_CLIENT'], <AddTest />)} />
+          <Route path='test' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <Test />)} />
+          <Route path='client' element={protectedRoute(['ROLE_CLIENT'], <TestWork />)} />
           <Route path='user-results' element={protectedRoute(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'], <UserResults />)} />
           <Route path='employees' element={protectedRoute('ROLE_SUPER_ADMIN', <Employees />)} />
-          <Route path='result' element={protectedRoute('ROLE_CLIENT', <UserResults />)} />
+          <Route path='result' element={protectedRoute('ROLE_CLIENT', <ClientResult />)} />
           <Route path='addresses' element={protectedRoute('ROLE_SUPER_ADMIN', <Adress />)} />
+          <Route path='client/test' element={protectedRoute('ROLE_CLIENT', <ClientTest />)} />
+          
         </Route>
       </Routes>
   );
