@@ -1,100 +1,229 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Timer, ChevronUp } from 'lucide-react';
 
-// API'dan qaytgan ma'lumotlar tipi
 interface OptionDto {
   id: number;
   answer: string;
   isCorrect: boolean;
-  questionId: number;
 }
 
 interface QuestionDto {
   id: number;
   name: string;
-  categoryName: string;
-  categoryId: number;
   optionDtos: OptionDto[];
-}
-
-interface QuizData {
-  message: string;
-  success: boolean;
-  status: string;
-  body: {
-    countAnswers: number;
-    duration: number;
-    questionDtoList: QuestionDto[];
-    type: string;
-  };
+  type: string; // MANY_CHOICE or ONE_CHOICE
 }
 
 const TestWork: React.FC = () => {
-  const [quizData, setQuizData] = useState<QuizData | null>(null); // API ma'lumotlarini saqlash
+  const [questions, setQuestions] = useState<QuestionDto[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [selectedAnswers, setSelectedAnswers] = useState<Map<number, string[]>>(new Map());
+  const [correctAnswers, setCorrectAnswers] = useState<number>(0);
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get('id');
+  const token = sessionStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // API so'rovini yuborish
-    const token = sessionStorage.getItem('token');
-    const fetchQuizData = async () => {
+    const fetchQuestions = async () => {
+      if (!categoryId) return;
+
+      const apiUrl = `http://142.93.106.195:9090/quiz/start/${categoryId}`;
       try {
-        const response = await fetch(`http://142.93.106.195:9090/quiz/start/58`, {
-          method: 'GET', // GET so'rovi
+        const response = await fetch(apiUrl, {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`, // Tokenni Authorization headerga qo'shish
-            'Content-Type': 'application/json', // JSON formatini ko'rsatish
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch quiz data');
+          const errorData = await response.json();
+          console.error('Xatolik:', errorData);
+          alert(`Xatolik: ${errorData.message}`);
+          return;
         }
 
-        const data: QuizData = await response.json(); // API'dan qaytgan ma'lumotni olish
-        setQuizData(data); // Ma'lumotni holatga saqlash
+        const data = await response.json();
+        setQuestions(data.body.questionDtoList);
       } catch (error) {
-        console.error('Error fetching quiz data:', error);
+        console.error('Xatolik:', error);
+        alert('Server bilan bog‘lanishda xatolik yuz berdi.');
       }
     };
 
-    fetchQuizData();
-  }, []); // faqat komponent yuklanganda so'rov yuboriladi
+    fetchQuestions();
+  }, [categoryId]);
+
+  const currentQuestion = questions[currentPage - 1];
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  const handleAnswerChange = (questionId: number, answer: string, isChecked: boolean) => {
+    setSelectedAnswers((prev) => {
+      const currentAnswers = prev.get(questionId) || [];
+      if (isChecked) {
+        return new Map(prev).set(questionId, [...currentAnswers, answer]);
+      } else {
+        return new Map(prev).set(questionId, currentAnswers.filter((a) => a !== answer));
+      }
+    });
+  };
+
+  const handleSubmitAnswer = () => {
+    const currentQuestionData: QuestionDto = questions[currentPage - 1];
+    const selectedAnswer: string[] = selectedAnswers.get(currentQuestionData.id) || [];
+    const correctOptions: OptionDto[] = currentQuestionData.optionDtos.filter((option) => option.isCorrect);
+    const correctAnswerIds: string[] = correctOptions.map((option) => option.answer);
+  
+    let isCorrect: boolean = false;
+  
+    if (currentQuestionData.type === 'ONE_CHOICE' && selectedAnswer.length === 1) {
+      isCorrect = correctAnswerIds.includes(selectedAnswer[0]);
+    } else if (currentQuestionData.type === 'MANY_CHOICE') {
+      isCorrect =
+        selectedAnswer.every((answer) => correctAnswerIds.includes(answer)) &&
+        selectedAnswer.length === correctAnswerIds.length;
+    }
+  
+    if (isCorrect) {
+      setCorrectAnswers((prev: number) => prev + 1);
+    }
+  
+    if (currentPage < questions.length) {
+      setCurrentPage(currentPage + 1);
+    } else {
+      submitTest();
+    }
+  
+    setSelectedAnswers((prev: Map<number, string[]>) => new Map(prev).delete(currentQuestionData.id));
+  };
+  
+
+  const submitTest = async () => {
+    const duration: number = Math.floor((Date.now() - startTime) / 1000); // Test davomiyligi (sekundlarda)
+    let correctAnswers = 0; // To'g'ri javoblar soni
+    let wrongAnswers = 0; // Noto'g'ri javoblar soni
+    const countAnswers: number = questions.length; // Barcha javoblar soni
+  
+    // Javoblarni tekshirish va to'g'ri javoblarni hisoblash
+    questions.forEach((question) => {
+      const selectedAnswer = selectedAnswers.get(question.id);
+      const correctOptions = question.optionDtos.filter((option) => option.isCorrect);
+      const correctAnswerIds = correctOptions.map((option) => option.answer);
+  
+      if (selectedAnswer) {
+        if (correctAnswerIds.includes(selectedAnswer[0])) {
+          correctAnswers += 1; // To'g'ri javoblar soni
+        } else {
+          wrongAnswers += 1; // Noto'g'ri javoblar soni
+        }
+      }
+    });
+  
+    // Request body
+    const requestBody = questions.map((question) => {
+      const selectedAnswer = selectedAnswers.get(question.id);
+      const selectedOptionIds = question.optionDtos
+        .filter((option) => selectedAnswer?.includes(option.answer))
+        .map((option) => option.id);
+  
+      return {
+        questionId: question.id,
+        optionIds: selectedOptionIds, // Multiple options for MANY_CHOICE
+        answer: selectedAnswer ? selectedAnswer.join(', ') : '', // Store all selected answers for MANY_CHOICE
+      };
+    });
+  
+    const apiUrl = `http://142.93.106.195:9090/quiz/pass/${categoryId}?duration=${duration}&countAnswers=${countAnswers}`;
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody), // Body qo'shildi
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Xatolik:', errorData);
+        alert(`Xatolik: ${errorData.message}`);
+      } else {
+        const data = await response.json();
+        alert(`Test yakunlandi! Siz ${correctAnswers} ta to'g'ri javob berdingiz. Noto'g'ri javoblar: ${wrongAnswers}`);
+        navigate('/client/test/result'); // Natija sahifasiga o'tish
+      }
+    } catch (error) {
+      console.error('Xatolik:', error);
+      alert('Testni yuborishda xatolik yuz berdi.');
+    }
+  };
+  
+  
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Test Ishlash</h1>
-      {quizData ? (
+    <div className="w-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-semibold text-gray-900">Test Savollari</h1>
+        <div className="flex items-center text-gray-600">
+          <Timer className="w-5 h-5 mr-2" />
+          <span>9:54</span>
+        </div>
+      </div>
+
+      {currentQuestion ? (
         <div>
-          <h2 className="text-2xl font-semibold mb-4">{quizData.message}</h2>
-          <p className="mb-4">Status: {quizData.status}</p>
-          <p className="mb-4">Success: {quizData.success ? 'Yes' : 'No'}</p>
-          <p className="mb-4">Duration: {quizData.body.duration} minutes</p>
-          <p className="mb-4">Answers Count: {quizData.body.countAnswers}</p>
+          <div key={currentQuestion.id} className="mb-6 p-6 border rounded-lg bg-gray-50">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{currentQuestion.name}</h3>
+            <ul className="space-y-4">
+              {currentQuestion.optionDtos.map((option) => (
+                <li key={option.id} className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                  <input
+                    type={currentQuestion.type === 'MANY_CHOICE' ? 'checkbox' : 'radio'}
+                    name={`answer-${currentQuestion.id}`}
+                    value={option.answer}
+                    checked={selectedAnswers.get(currentQuestion.id)?.includes(option.answer)}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, option.answer, e.target.checked)}
+                    className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-700">{option.answer}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quizData.body.questionDtoList.map((question) => (
-              <div key={question.id} className="bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-xl font-semibold mb-4">{question.name}</h3>
-                <p className="text-gray-500 mb-4">Category: {question.categoryName}</p>
-
-                <div className="space-y-4">
-                  {question.optionDtos.map((option) => (
-                    <div
-                      key={option.id}
-                      className={`p-4 rounded-lg border ${option.isCorrect ? 'border-green-500 bg-green-100' : 'border-red-500 bg-red-100'}`}
-                    >
-                      <p className="text-lg">{option.answer}</p>
-                      <p className="text-sm text-gray-500">{option.isCorrect ? 'Correct' : 'Incorrect'}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="flex justify-center gap-4 mt-6">
+            {questions.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => paginate(index + 1)}
+                className={`px-6 py-2 rounded-lg ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}
+              >
+                {index + 1}
+              </button>
             ))}
           </div>
         </div>
       ) : (
-        <p>Test ma'lumotlari yuklanmoqda...</p>
+        <p className="text-gray-600 text-center">Savollar yuklanmoqda...</p>
       )}
+
+      <div className="flex justify-between items-center mt-6">
+        <button
+          onClick={handleSubmitAnswer}
+          className="flex items-center px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Savolni yakunlash
+          <ChevronUp className="ml-2 w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
-}
+};
 
 export default TestWork;

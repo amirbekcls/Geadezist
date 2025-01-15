@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {  Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Register from './auth/Register';
 import ForgotPassword from './auth/password/forgetPassword';
 import ResetPassword from './auth/password/resetPassword';
@@ -15,17 +15,15 @@ import AdminLaylaut from './Laylaut/adminLaylaut';
 import AddTest from './components/Test/AddTest';
 import TestWork from './components/Tests/TestWork';
 import Test from './pages/test';
-import ClientResult from './components/ClientResult/clientresult';
 import ClientTest from './components/ClientTest/clienttest';
-
-// import NotFound from './pages/NotFound';
-// import Distric from './pages/Addresses/distric';
+import ClientResult from './components/ClientResult/clientresult';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role = sessionStorage.getItem('role');
   const token = sessionStorage.getItem('token');
+
   // Redirect unauthenticated users to login
   useEffect(() => {
     if (!token && location.pathname !== '/login') {
@@ -57,30 +55,30 @@ const App: React.FC = () => {
   };
 
   return (
-      <Routes>
-        <Route path='/register' element={<Register />} />
-        <Route path='/changepass' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
-        <Route path='/verify-code' element={<VerifyCode />} />
-        {/* <Route path='/*' element={<NotFound />} /> */}
+    <Routes>
+      <Route path='/register' element={<Register />} />
+      <Route path='/changepass' element={<ForgotPassword />} />
+      <Route path='/reset-password' element={<ResetPassword />} />
+      <Route path='/verify-code' element={<VerifyCode />} />
 
-        <Route path='/login' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <Login />} />
-        {/* <Route path='/distric' element={<Distric />} /> */}
+      <Route path='/login' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <Login />} />
 
-        <Route path='/' element={role ? <AdminLaylaut /> : <Navigate to='/login' />}>
-          <Route path='dashboard' element={<Dashboard />} />
-          <Route path='users' element={protectedRoute('ROLE_SUPER_ADMIN', <Users />)} />
-          <Route path='categories' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <Categories />)} />
-          <Route path='test' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <Test />)} />
-          <Route path='client' element={protectedRoute(['ROLE_CLIENT'], <TestWork />)} />
-          <Route path='user-results' element={protectedRoute(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'], <UserResults />)} />
-          <Route path='employees' element={protectedRoute('ROLE_SUPER_ADMIN', <Employees />)} />
-          <Route path='result' element={protectedRoute('ROLE_CLIENT', <ClientResult />)} />
-          <Route path='addresses' element={protectedRoute('ROLE_SUPER_ADMIN', <Adress />)} />
-          <Route path='client/test' element={protectedRoute('ROLE_CLIENT', <ClientTest />)} />
-          
-        </Route>
-      </Routes>
+      <Route path='/' element={role ? <AdminLaylaut /> : <Navigate to='/login' />}>
+        <Route path='dashboard' element={<Dashboard />} />
+        <Route path='users' element={protectedRoute('ROLE_SUPER_ADMIN', <Users />)} />
+        <Route path='categories' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <Categories />)} />
+        <Route path='test' element={protectedRoute(['ROLE_TESTER', 'ROLE_SUPER_ADMIN'], <AddTest />)} />
+        
+        {/* Client section */}
+        <Route path='client/test' element={protectedRoute(['ROLE_CLIENT'], <ClientTest />)} />
+        <Route path='client/test/work' element={protectedRoute(['ROLE_CLIENT'], <TestWork />)} />
+        <Route path='client/test/result' element={protectedRoute('ROLE_CLIENT', <ClientResult />)} />
+
+        <Route path='user-results' element={protectedRoute(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'], <UserResults />)} />
+        <Route path='employees' element={protectedRoute('ROLE_SUPER_ADMIN', <Employees />)} />
+        <Route path='addresses' element={protectedRoute('ROLE_SUPER_ADMIN', <Adress />)} />
+      </Route>
+    </Routes>
   );
 };
 
