@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Timer, ChevronUp } from 'lucide-react';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface OptionDto {
   id: number;
@@ -155,7 +156,8 @@ const TestWork: React.FC = () => {
         alert(`Xatolik: ${errorData.message}`);
       } else {
         const data = await response.json();
-        alert(`Test yakunlandi! Siz ${correctAnswers} ta to'g'ri javob berdingiz. Noto'g'ri javoblar: ${wrongAnswers}`);
+        // alert(`Test yakunlandi! Siz ${correctAnswers} ta to'g'ri javob berdingiz. Noto'g'ri javoblar: ${wrongAnswers}`);
+        toast.success('Test Yakunlandi')
         navigate('/client/test/result'); // Natija sahifasiga o'tish
       }
     } catch (error) {
@@ -222,6 +224,7 @@ const TestWork: React.FC = () => {
           <ChevronUp className="ml-2 w-5 h-5" />
         </button>
       </div>
+      <ToastContainer/>
     </div>
   );
 };

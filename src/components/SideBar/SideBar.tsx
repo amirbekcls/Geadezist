@@ -50,7 +50,7 @@ const Sidebar = () => {
     },
     {
       name: "Натижалар булими",
-      path: "/result",
+      path: "client/test/result",
       roles: ["ROLE_CLIENT"],
     }
   ];

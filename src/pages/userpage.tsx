@@ -1,20 +1,30 @@
 import { Input, Select, DatePicker, Button } from 'antd';
 import React, { useState, useEffect } from 'react';
-import useAddressStore from '../store/adressStore';
-import { District, Region } from '../types/adressstype';
+import axios from 'axios';
+import { UserProfile } from '../api/api';
 
 const { Option } = Select;
 
 function Userpage() {
-    const { regions, districts } = useAddressStore(); 
-    const [selectedRegion, setSelectedRegion] = useState<string | null >(null);
-    const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
+    const [data, setData] = useState<any[]>([]); // Viloyat ma'lumotlarini saqlash
 
-    const handleRegionChange = (value: string ) => {
-        setSelectedRegion(value);
-        const filtered = districts.filter((district) => district.regionId === value);
-        setFilteredDistricts(filtered); 
-    };
+    useEffect(() => {
+        const fetchData = async () => {
+            let token = sessionStorage.getItem('token')
+            try {
+                const response = await axios.get(UserProfile, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Tokenni sarlavha sifatida qo'shish
+                    },
+                });
+                setData(response.data.body); // Faqat bir marta ma'lumotni o'rnatish
+                console.log(response.data); // Javobni konsolda tekshiring
+            } catch (e: any) {
+                console.error('Error fetching regions:', e.message);
+            }
+        };
+        fetchData();
+    }, []); // Bo'sh array - faqat bir marta ishlaydi
 
     return (
         <div>
@@ -28,44 +38,38 @@ function Userpage() {
                 </div>
                 <div className="user_bottom bg-white border-1 border-black w-[100%] h-[500px]">
                     <div className="w-[100%] flex">
-                        {/* Left Column */}
+                        {/* Chap ustun */}
                         <div className="w-[50%] h-[400px] flex flex-col justify-center items-center gap-10">
                             <Input placeholder="Ism" style={{ width: '70%', height: '50px' }} />
-                            <Select
-                                placeholder="Viloyat"
+                            {/* <Select */}
+                                {/* placeholder="Viloyat"
                                 style={{ width: '70%', height: '50px' }}
-                                onChange={handleRegionChange}
-                            >
-                                {regions.map((region: Region) => (
-                                    <Option key={region.id} value={region.id}>
-                                        {region.name}
-                                    </Option>
+                            > */}
+                                {Array.isArray(data) && data.map((region: any) => (
+                                    <li style={{color:'black'}} key={region.id} value={region.id}>
+                                        {region.fullName || "salom"}
+                                    </li>
                                 ))}
-                            </Select>
+
+                            {/* </Select> */}
                             <Input placeholder="E-pochta" style={{ width: '70%', height: '50px' }} />
                             <Input placeholder="Telefon raqam" style={{ width: '70%', height: '50px' }} />
-                            
                         </div>
 
+                        {/* O'ng ustun */}
                         <div className="w-[50%] h-[400px] flex flex-col justify-center items-center gap-10">
                             <Input placeholder="Familya" style={{ width: '70%', height: '50px' }} />
                             <Select
                                 placeholder="Tuman"
                                 style={{ width: '70%', height: '50px' }}
                             >
-                                {filteredDistricts.map((district: District) => (
-                                    <Option key={district.id} value={district.id}>
-                                        {district.name}
-                                    </Option>
-                                ))}
+                                <Option disabled>Tumanlar topilmadi</Option>
                             </Select>
                             <Input placeholder="Kocha" style={{ width: '70%', height: '50px' }} />
                             <DatePicker placeholder="Tug'ilgan sana" style={{ width: '70%', height: '50px' }} />
                         </div>
                     </div>
-                    <Button className='ml-[120px] ' > uzgarishlarni saqlash</Button>
-
-
+                    <Button className="ml-[120px]">O'zgarishlarni saqlash</Button>
                 </div>
             </div>
         </div>

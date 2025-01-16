@@ -17,6 +17,7 @@ import TestWork from './components/Tests/TestWork';
 import Test from './pages/test';
 import ClientTest from './components/ClientTest/clienttest';
 import ClientResult from './components/ClientResult/clientresult';
+import Userpage from './pages/userpage';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -60,6 +61,8 @@ const App: React.FC = () => {
       <Route path='/changepass' element={<ForgotPassword />} />
       <Route path='/reset-password' element={<ResetPassword />} />
       <Route path='/verify-code' element={<VerifyCode />} />
+      <Route path='user/profile' element={<Userpage />} />
+
 
       <Route path='/login' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <Login />} />
 

@@ -1,50 +1,67 @@
-import { create } from 'zustand';
-import { AddressStore, Region, District } from '../types/adressstype'; // Import the types
+import {create} from "zustand";
+
+interface AddressStore {
+    // State variables
+    districts: any[];
+    regions: any[];
+    districtName: string;
+    regionName: string;
+    selectedRegionId: number | null;
+    editedDistrict: any | null;
+    editedRegion: any | null;
+    isDistrictAddModalVisible: boolean;
+    isDistrictEditModalVisible: boolean;
+    isDistrictDeleteModalVisible: boolean;
+    isRegionAddModalVisible: boolean;
+    isRegionEditModalVisible: boolean;
+    isRegionDeleteModalVisible: boolean;
+
+    // Setters
+    setDistricts: (districts: any[]) => void;
+    setRegions: (regions: any[]) => void;
+    setDistrictName: (name: string) => void;
+    setRegionName: (name: string) => void;
+    setSelectedRegionId: (id: number | null) => void;
+    setEditedDistrict: (district: any | null) => void;
+    setEditedRegion: (region: any | null) => void;
+    setIsDistrictAddModalVisible: (visible: boolean) => void;
+    setIsDistrictEditModalVisible: (visible: boolean) => void;
+    setIsDistrictDeleteModalVisible: (visible: boolean) => void;
+    setIsRegionAddModalVisible: (visible: boolean) => void;
+    setIsRegionEditModalVisible: (visible: boolean) => void;
+    setIsRegionDeleteModalVisible: (visible: boolean) => void;
+}
 
 const useAddressStore = create<AddressStore>((set) => ({
-  // Initial states
-  districts: [],
-  regions: [],
-  districtName: '',
-  selectedRegion: null,
-  selectedRegionId: null,
-  regionName: '',
-  editedDistrict: null,
-  editedRegionName: '',
-  isRegionAddModalVisible: false,
-  isRegionEditModalVisible: false,
-  isRegionDeleteModalVisible: false,
-  isDistrictAddModalVisible: false,
-  isDistrictEditModalVisible: false,
-  isDistrictDeleteModalVisible: false,
-  selectedDistrictForDelete: null,
-  editedRegion: null,
-  setEditedRegion: (region: Region | null) => set({ editedRegion: region }),
-  // Actions for managing Region Name and Edited Region Name
-  setRegionName: (name: string) => set({ regionName: name }),
-  setEditedRegionName: (name: string) => set({ editedRegionName: name }),
+    // Initial state
+    districts: [],
+    regions: [],
+    districtName: "",
+    regionName: "",
+    selectedRegionId: null,
+    editedDistrict: null,
+    editedRegion: null,
+    isDistrictAddModalVisible: false,
+    isDistrictEditModalVisible: false,
+    isDistrictDeleteModalVisible: false,
+    isRegionAddModalVisible: false,
+    isRegionEditModalVisible: false,
+    isRegionDeleteModalVisible: false,
 
-  // Actions for managing Region data
-  setRegions: (regions: Region[]) => set({ regions }),
-  setSelectedRegion: (region: Region | null) => set({ selectedRegion: region }),
-  setSelectedRegionId: (id: number | null) => set({ selectedRegionId: id }),
-
-  // Actions for managing District data
-  setDistricts: (districts: District[]) => set({ districts }),
-  setDistrictName: (name: string) => set({ districtName: name }),
-
-  // Actions for managing selected District for deletion
-  setSelectedDistrictForDelete: (district: District | null) => set({ selectedDistrictForDelete: district }),
-  setEditedDistrict: (district: District | null) => set({ editedDistrict: district }),
-
-  // Modal visibility actions
-  setIsRegionAddModalVisible: (visible: boolean) => set({ isRegionAddModalVisible: visible }),
-  setIsRegionEditModalVisible: (visible: boolean) => set({ isRegionEditModalVisible: visible }),
-  setIsRegionDeleteModalVisible: (visible: boolean) => set({ isRegionDeleteModalVisible: visible }),
-
-  setIsDistrictAddModalVisible: (visible: boolean) => set({ isDistrictAddModalVisible: visible }),
-  setIsDistrictEditModalVisible: (visible: boolean) => set({ isDistrictEditModalVisible: visible }),
-  setIsDistrictDeleteModalVisible: (visible: boolean) => set({ isDistrictDeleteModalVisible: visible }),
+    // Setters
+    setDistricts: (districts) => set({ districts }),
+    setRegions: (regions) => set({ regions }),
+    setDistrictName: (name) => set({ districtName: name }),
+    setRegionName: (name) => set({ regionName: name }),
+    setSelectedRegionId: (id) => set({ selectedRegionId: id }),
+    setEditedDistrict: (district) => set({ editedDistrict: district }),
+    setEditedRegion: (region) => set({ editedRegion: region }),
+    setIsDistrictAddModalVisible: (visible) => set({ isDistrictAddModalVisible: visible }),
+    setIsDistrictEditModalVisible: (visible) => set({ isDistrictEditModalVisible: visible }),
+    setIsDistrictDeleteModalVisible: (visible) => set({ isDistrictDeleteModalVisible: visible }),
+    setIsRegionAddModalVisible: (visible) => set({ isRegionAddModalVisible: visible }),
+    setIsRegionEditModalVisible: (visible) => set({ isRegionEditModalVisible: visible }),
+    setIsRegionDeleteModalVisible: (visible) => set({ isRegionDeleteModalVisible: visible }),
 }));
 
 export default useAddressStore;
