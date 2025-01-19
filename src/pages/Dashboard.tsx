@@ -4,6 +4,9 @@ import { BiCategory } from 'react-icons/bi';
 import { FaCircleQuestion } from 'react-icons/fa6';
 import { PiArrowsOutCardinal } from 'react-icons/pi';
 import { FaUsers } from 'react-icons/fa';
+import axios from 'axios';
+import { DashboardAllStc } from '../api/api';
+import WeeklyStatsChart from './Chart';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -13,7 +16,15 @@ interface User {
   firstName: string;
   lastName: string;
   correctAnswers: number;
-  categoryName:string
+  categoryName: string;
+  regionID: number;  // Added regionID to user type
+}
+
+interface AllStatc {
+  categoryCount: number;
+  questionCount: number;
+  resultCount: number;
+  userCount: number;
 }
 
 const Dashboard: React.FC = () => {
@@ -21,6 +32,7 @@ const Dashboard: React.FC = () => {
   const [regionID, setRegionID] = useState(null);
   const [totalPage, setTotalPage] = useState(10);
   const [data, setData] = useState<User[] | null>(null);
+  const [allStatc, setAllStatc] = useState<AllStatc | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,25 +50,30 @@ const Dashboard: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(apiUrl, {
-          method: "GET",
+        // Build the query params dynamically based on categoryID and regionID
+        const params: any = {};
+        if (categoryID) params.categoryID = categoryID;
+        if (regionID) params.regionID = regionID;
+
+        const response = await axios.get(apiUrl, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          params, // Add filters as query parameters
+        });
+
+        setData(response.data.body.body);
+
+        const dresponse = await axios.get(DashboardAllStc, {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
+        setAllStatc(dresponse.data.body);
+        console.log(dresponse.data.body);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result && result.body) {
-          setData(result.body.body);
-        } else {
-          setError("No data found in the response body.");
-        }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -65,14 +82,14 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [categoryID, regionID]); // Re-fetch data when categoryID or regionID changes
 
   // Card data
   const cardData = [
-    { title: 'Умумий категория', total: 0, icon: <BiCategory className="text-2xl ml-5" /> },
-    { title: 'Умумий савол', total: 0, icon: <FaCircleQuestion className="text-2xl ml-5" /> },
-    { title: 'Умумий натижа', total: 0, icon: <PiArrowsOutCardinal className="text-2xl ml-5" /> },
-    { title: 'Жами фойдаланувчилар', total: 0, icon: <FaUsers className="text-2xl ml-5" /> },
+    { title: 'Умумий категория', total: allStatc?.categoryCount || 0, icon: <BiCategory className="text-2xl ml-5" /> },
+    { title: 'Умумий савол', total: allStatc?.questionCount || 0, icon: <FaCircleQuestion className="text-2xl ml-5" /> },
+    { title: 'Умумий натижа', total: allStatc?.resultCount || 0, icon: <PiArrowsOutCardinal className="text-2xl ml-5" /> },
+    { title: 'Жами фойдаланувчилар', total: allStatc?.userCount || 0, icon: <FaUsers className="text-2xl ml-5" /> },
   ];
 
   // Table columns
@@ -83,6 +100,16 @@ const Dashboard: React.FC = () => {
     { title: 'Категория номи', dataIndex: 'categoryName', key: 'categoryName' },
     { title: 'Натижа (Тўғри жавоблар/Умумий саволлар)', dataIndex: 'correctAnswers', key: 'correctAnswers' },
   ];
+
+  // Get unique categories from data
+  const uniqueCategories = Array.from(new Set(data?.map(item => item.categoryName) || []));
+  
+  // Filtered data based on categoryID and regionID
+  const filteredData = data?.filter(item => {
+    const matchesCategory = categoryID ? item.categoryName === categoryID : true;
+    const matchesRegion = regionID ? item.regionID === regionID : true;
+    return matchesCategory && matchesRegion;
+  });
 
   return (
     <>
@@ -103,6 +130,7 @@ const Dashboard: React.FC = () => {
 
       <div className="mt-4">
         <Title level={3}>Chart Joyi </Title>
+        <WeeklyStatsChart />
       </div>
 
       <div className="mt-10">
@@ -115,8 +143,11 @@ const Dashboard: React.FC = () => {
               onChange={(value) => setCategoryID(value)}
               allowClear
             >
-              <Option value="1">Category 1</Option>
-              <Option value="2">Category 2</Option>
+              {uniqueCategories.map((category, index) => (
+                <Option key={index} value={category}>
+                  {category}
+                </Option>
+              ))}
             </Select>
           </Col>
           <Col span={12}>
@@ -136,15 +167,15 @@ const Dashboard: React.FC = () => {
         {/* Table for User Results */}
         {loading && <p>Loading...</p>}
         {error && <p>Error: {error}</p>}
-        {data && (
+        {filteredData && (
           <Table
             columns={columns}
-            dataSource={data.map((user, index) => ({
+            dataSource={filteredData.map((user, index) => ({
               key: index + 1,
               firstName: user.firstName,
               lastName: user.lastName,
-              categoryName: user.categoryName, // Adjust as needed
-              correctAnswers: `${user.correctAnswers}/20`, // Adjust as needed
+              categoryName: user.categoryName,
+              correctAnswers: `${user.correctAnswers}/20`,
             }))}
             pagination={false}
             bordered

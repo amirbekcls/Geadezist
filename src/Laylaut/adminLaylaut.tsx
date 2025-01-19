@@ -12,7 +12,7 @@ const AdminLayout: React.FC = () => {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="w-full bg-white">
+      <header className="w-full bg-white flex flex-end">
         {/* <Header>
           <div className="flex justify-end p-3">
             <img className="" src="" alt="ram yuq" />

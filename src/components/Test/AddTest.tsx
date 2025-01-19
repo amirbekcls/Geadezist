@@ -41,6 +41,10 @@ const AddTest: React.FC = () => {
   const [categoryData, setCategoryData] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterDifficulty, setFilterDifficulty] = useState<string>('');
+  const [filterType, setFilterType] = useState<string>('');
+
 
   const token = sessionStorage.getItem('token');
 
@@ -205,6 +209,28 @@ const AddTest: React.FC = () => {
       }
     }
   };
+  useEffect(() => {
+    if (token) {
+      const fetchTests = async () => {
+        try {
+          const params: any = {};
+          if (filterCategory) params.categoryId = filterCategory;
+          if (filterDifficulty) params.difficulty = filterDifficulty;
+          if (filterType) params.type = filterType;
+  
+          const response = await axios.get('http://142.93.106.195:9090/question/filter', {
+            headers: { Authorization: `Bearer ${token}` },
+            params,
+          });
+          setTestList(response.data?.body?.body || response.data?.body); // Update test list
+        } catch (error) {
+          console.error('Error fetching tests:', error);
+        }
+      };
+      fetchTests();
+    }
+  }, [token, setTestList, filterCategory, filterDifficulty, filterType]);
+  
 
   // Table columns definition
   const columns = [
@@ -238,10 +264,10 @@ const AddTest: React.FC = () => {
       render: (_: any, record: TestDetails) => (
         <div className="flex gap-2">
           <Button onClick={() => openModal(record)} type="link" size="small">
-              <MdEdit className='text-black hover:text-yellow-600'/>
+            <MdEdit className='text-black hover:text-yellow-600' />
           </Button>
           <Button onClick={() => handleDelete(record.id!)} type="link" size="small">
-            <MdDelete className='text-black hover:text-red-600'/>
+            <MdDelete className='text-black hover:text-red-600' />
           </Button>
         </div>
       ),
@@ -250,6 +276,9 @@ const AddTest: React.FC = () => {
 
   return (
     <>
+      {/* Table to display the tests */}
+    
+  
       <div className="mb-5 w-full flex justify-between items-center flex-wrap xl:flex-nowrap gap-5">
         <button className="bg-blue-500 text-white p-2 rounded" onClick={() => openModal()}>
           <div className="flex justify-center items-center">
@@ -258,8 +287,46 @@ const AddTest: React.FC = () => {
           </div>
         </button>
       </div>
-
-      {/* Table to display the tests */}
+  
+      <div className="flex gap-5 mb-5">
+        <Select
+          value={filterCategory}
+          onChange={(value) => setFilterCategory(value)}
+          placeholder="Категория фильтри"
+          className="w-full"
+        >
+          <Option value="">Барчаси</Option>
+          {categoryData.map((item) => (
+            <Option value={item.id} key={item.id}>
+              {item.name}
+            </Option>
+          ))}
+        </Select>
+  
+        <Select
+          value={filterDifficulty}
+          onChange={(value) => setFilterDifficulty(value)}
+          placeholder="Қийинлик фильтри"
+          className="w-full"
+        >
+          <Option value="">Барчаси</Option>
+          <Option value="HARD">Қийин</Option>
+          <Option value="MEDIUM">Ўрта</Option>
+          <Option value="EASY">Осон</Option>
+        </Select>
+  
+        <Select
+          value={filterType}
+          onChange={(value) => setFilterType(value)}
+          placeholder="Тур фильтри"
+          className="w-full"
+        >
+          <Option value="">Барчаси</Option>
+          <Option value="SUM">Ҳисобланган натижа</Option>
+          <Option value="ONE_CHOICE">Бир тўғри жавобли тест</Option>
+          <Option value="MANY_CHOICE">Кўп тўғри жавобли тест</Option>
+        </Select>
+      </div>
       <Table
         dataSource={testList}
         columns={columns}
@@ -267,13 +334,12 @@ const AddTest: React.FC = () => {
         pagination={false}
         className="mb-5"
       />
-
       {/* Modal for adding or editing tests */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-5 rounded-lg w-[40rem]">
             <h2 className="text-center text-xl font-bold mb-5">{isEditing ? 'Тест таҳрирлаш' : 'Тест қўшиш'}</h2>
-
+  
             <input
               type="text"
               value={testDetails.name}
@@ -281,7 +347,7 @@ const AddTest: React.FC = () => {
               placeholder="Тест номини киритинг"
               className="w-full rounded-lg border py-2 px-5 mb-4 text-black outline-none focus:border-primary"
             />
-
+  
             <div className="mb-4">
               <label className="block mb-2">Категория</label>
               <Select
@@ -297,7 +363,7 @@ const AddTest: React.FC = () => {
                 ))}
               </Select>
             </div>
-
+  
             <div className="mb-4">
               <label className="block mb-2">Қийинлик</label>
               <Select
@@ -311,7 +377,7 @@ const AddTest: React.FC = () => {
                 <Option value="EASY">Осон</Option>
               </Select>
             </div>
-
+  
             <div className="mb-4">
               <label className="block mb-2">Тур</label>
               <Select
@@ -325,10 +391,10 @@ const AddTest: React.FC = () => {
                 <Option value="MANY_CHOICE">Кўп тўғри жавобли тест</Option>
               </Select>
             </div>
-
+  
             <div className="mb-4">
               <label className="block mb-2">Вариантлар</label>
-
+  
               {/* Default option */}
               {testDetails.optionDtos.length === 0 && (
                 <div className="flex gap-4 mb-2">
@@ -348,7 +414,7 @@ const AddTest: React.FC = () => {
                   <input type="checkbox" disabled />
                 </div>
               )}
-
+  
               {/* Dynamic options */}
               {testDetails.optionDtos.map((option, index) => (
                 <div key={index} className="flex gap-4 mb-2">
@@ -375,18 +441,16 @@ const AddTest: React.FC = () => {
                   />
                 </div>
               ))}
-
+  
               {/* Add button */}
               <button
                 onClick={handleAddOption}
                 className="bg-green-500 text-white p-2 rounded mt-2"
-              >142
+              >
                 +
               </button>
             </div>
-
-
-
+  
             <div className="flex justify-end gap-4">
               <button
                 className="bg-gray-500 text-white p-2 rounded"
@@ -406,6 +470,7 @@ const AddTest: React.FC = () => {
       )}
     </>
   );
+  
 };
 
 export default AddTest;

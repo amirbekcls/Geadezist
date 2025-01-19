@@ -61,9 +61,9 @@ function Login() {
         // Directly navigate based on the role
         const role = response.data.role;
         if (role === "ROLE_SUPER_ADMIN") navigate("/dashboard");
-        else if (role === "ROLE_TESTER") navigate("/tester-dashboard");
-        else if (role === "ROLE_ADMIN") navigate("/admin-dashboard");
-        else if (role === "ROLE_CLIENT") navigate("/result");
+        else if (role === "ROLE_TESTER") navigate("/user-results");
+        else if (role === "ROLE_ADMIN") navigate("/user-results");
+        else if (role === "ROLE_CLIENT") navigate("/client/test/result");
         else navigate("/login");
       } else {
         setError("Email yoki parol noto'g'ri.");

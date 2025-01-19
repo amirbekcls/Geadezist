@@ -25,9 +25,9 @@ const App: React.FC = () => {
   const role = sessionStorage.getItem('role');
   const token = sessionStorage.getItem('token');
 
-  // Redirect unauthenticated users to login
+  // Redirect unauthenticated users to login, but allow access to certain pages
   useEffect(() => {
-    if (!token && location.pathname !== '/login') {
+    if (!token && !['/login', '/register', '/changepass', '/reset-password', '/verify-code'].includes(location.pathname)) {
       navigate('/login');
     }
   }, [token, location.pathname, navigate]);
@@ -57,12 +57,11 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route path='/register' element={<Register />} />
-      <Route path='/changepass' element={<ForgotPassword />} />
-      <Route path='/reset-password' element={<ResetPassword />} />
-      <Route path='/verify-code' element={<VerifyCode />} />
+      <Route path='/register' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <Register />} />
+      <Route path='/changepass' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <ForgotPassword />} />
+      <Route path='/reset-password' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <ResetPassword />} />
+      <Route path='/verify-code' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <VerifyCode />} />
       <Route path='user/profile' element={<Userpage />} />
-
 
       <Route path='/login' element={role ? <Navigate to={getDefaultRedirectPath()} /> : <Login />} />
 

@@ -63,40 +63,38 @@ function ClientResult() {
 
   return (
     <div>
-      <div className="flex ">
+      <div className="flex m-auto gap-5 justify-center">
         {data && data.length > 0 ? (
           data.map((item: ResultType) => (
             <div
               key={item.id}
-              className="w-[300px] bg-white border border-gray-200 rounded-lg shadow-lg p-6 m-4"
+              className="w-[400px] border border-black py-5 px-5 "
             >
-              <h3 className="text-xl font-semibold mb-4">
-                {item.firstName} {item.lastName}
-              </h3>
-              <p className="text-sm text-gray-600">ID: {item.id}</p>
-              <p className="text-sm text-gray-600">
-                Category: {item.categoryName || 'not found'}
-              </p>
-              <p className="text-sm text-gray-600">
-                Correct Answers: {item.correctAnswers}
-              </p>
-              <p className="text-sm text-gray-600">
-                Count Answers: {item.countAnswers}
-              </p>
-              <p className="text-sm text-gray-600">Duration: {item.durationTime}</p>
-              <p className="text-sm text-gray-600">
-                Status:{' '}
-                <span
-                  style={{
-                    ...getStatusStyle(item.status),
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                  }}
-                >
+              <div className="">
+                <h3 className="text-xl font-semibold mb-4">
+                  {item.firstName} {item.lastName}
+                </h3>
+                <p className="text-lg font-bold text-red-600 text-center py-2 ">
+                  {item.categoryName || 'not found'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Tugri Javoblar: {item.correctAnswers}/ {item.countAnswers}
+                </p>
+                <p className="text-sm text-gray-600">Vaqt davomiyligi: {item.durationTime} (daq)</p>
+                <p className="text-sm text-gray-600">Toplangan ball: {item.testScore}</p>
+                <p className="text-sm text-gray-600">Test topshirsh sana {item.createdAt}</p>
+                <div className="w-[200px] pt-10">
+                <span style={{...getStatusStyle(item.status),
+                  width:'100px',
+                  padding:'10px 100px',
+                  color:'white'
+                  // position:'absolute'
+                }}>
                   {item.status}
+
                 </span>
-              </p>
-              <p className="text-sm text-gray-600">Test Score: {item.testScore}</p>
+                </div>
+              </div>
             </div>
           ))
         ) : (
@@ -109,9 +107,8 @@ function ClientResult() {
         <button
           onClick={handlePrevPage}
           disabled={page === 0}
-          className={`px-4 py-2 rounded-lg ${
-            page === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'
-          }`}
+          className={`px-4 py-2 rounded-lg ${page === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'
+            }`}
         >
           Previous
         </button>
@@ -123,9 +120,8 @@ function ClientResult() {
         <button
           onClick={handleNextPage}
           disabled={page === totalPages - 1}
-          className={`px-4 py-2 rounded-lg ${
-            page === totalPages - 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'
-          }`}
+          className={`px-4 py-2 rounded-lg ${page === totalPages - 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'
+            }`}
         >
           Next
         </button>
